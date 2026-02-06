@@ -174,6 +174,11 @@ impl CompositorHandler for State {
     }
 
     fn new_surface(&mut self, surface: &WlSurface) {
+        if !surface.is_alive() {
+            tracing::error!("tried to add dmabuf pre-commit hook for a dead surface");
+            return;
+        }
+
         add_pre_commit_hook::<Self, _>(surface, move |state, _dh, surface| {
             let mut acquire_point = None;
             let maybe_dmabuf = with_states(surface, |surface_data| {
